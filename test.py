@@ -12,7 +12,7 @@ from fastapproximate import fastApproxMCMC
 fastmcmc=fastApproxMCMC()
 fastmcmc.readGraph(sys.argv[1])
 fastmcmc.printGraph()
-fastmcmc.fastApproximization(fastmcmc.requirements,0.2,1000)
+fastmcmc.fastApproximization(fastmcmc.requirements,0.5,1500)
 
 network=greedyMCMC()
 #unit test1 : read 

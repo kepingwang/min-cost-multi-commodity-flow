@@ -4,24 +4,20 @@ import copy
 from edge import Edge
 from sets import Set
 from min_cost_flow import MinCostFlow
-
 arglenth=len(sys.argv)
-
-class Network:
+class greedyMCMC:
     def __init__(self, pnumvertices=0):
         self.numV=pnumvertices
         #edgelist
         self.original_edges=[]
         self.edges=[]
-        self.balls=[]
+        #self.balls=[]
         self.exclusivePaths=[]
         self.edgeid=0
         self.requirements=[]
         self.alledges=[]
         self.maxCost=0
         self.maxCapacity=0
-
-
     def printGraph(self):
         print "-------GRAPH----------"
         print "num of vertices: "+str(self.numV)
@@ -31,7 +27,6 @@ class Network:
                 print str(e1)
         for r in self.requirements:
             print r
-
     def readGraph(self,filename):
         f=open(filename)
         self.numV=int(f.readline().replace("\n",""))
@@ -48,7 +43,6 @@ class Network:
                 mode=1
                 line=f.readline()
                 continue
-
             if mode==0:
                 edge=line.split(" ")
                 self.addEdge(int(edge[0]),int(edge[1]),int(edge[2]),int(edge[3]))
@@ -60,7 +54,6 @@ class Network:
 
     def addRequirement(self,v1,v2,b):
         self.requirements.append([v1,v2,b])
-
     def addEdge(self,v1,v2,capacity,cost):
         edgelist=self.edges[v1]
         newedge=Edge(self.edgeid,v1,v2,capacity,cost)
@@ -76,9 +69,8 @@ class Network:
                 print "edge already exists! please check"
         edgelist.append(newedge)
         self.edges[v2]=edgelist
-
     #input:[[v_i1,v_i2,b_i]]
-    def queryPath(self, listofpairs):
+    def greedy(self, listofpairs):
       print "len(listofpairs): %s" %(len(listofpairs))
       sop=Set()
       for p in listofpairs:
@@ -94,7 +86,7 @@ class Network:
           print "%s < %s"%(len(solutions),len(listofpairs))
           cur+=1
           print cur
-          sys.stdout.flush()
+          #sys.stdout.flush()
           if (pair[0],pair[1]) in solutions:
             continue
           #print "hah"
@@ -126,7 +118,6 @@ class Network:
                     ec[0].avlBW+=ec[1]
                     if ec[0]!=link[0]:
                       e_pair[ec[0]].remove(p)
-
                 e_pair[link[0]]=Set()
       for pair in solutions:
         print str(pair)
@@ -137,13 +128,24 @@ class Network:
         print "number of edges: %s"%(len(self.alledges))
         print "number of requests:%s " %(len(listofpairs))
         print "number of vertices:%s " %(self.numV)
-        print "maximum cost %s"%(self.maxCost)
+        usedbw=self.usedBW(solutions)
+        cost = sum([k.cost*usedbw[k] for k in usedbw])
+        print "total cost %s"%(cost)
         print "maximum capacity %s"%(self.maxCapacity)
       else:
         print "fail after %s iterations" %(cur)
 
+    def usedBW(self,x):
+      usedbw={}
+      for flow in x:
+        for link in x[flow]:
+          if(link[0] in usedbw):
+            usedbw[link[0]]=usedbw[link[0]]+link[1]
+          else:
+            usedbw[link[0]]=link[1]
+      return usedbw
+
     def printFlow(self,flow):
         for link in flow:
           print "edge: %s [%s]"%(link[0],link[1])
-
 

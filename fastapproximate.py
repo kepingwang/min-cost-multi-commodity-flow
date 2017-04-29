@@ -54,6 +54,7 @@ class fastApproxMCMC:
 
     def addRequirement(self,v1,v2,b):
         self.requirements.append([v1,v2,b])
+
     def addEdge(self,v1,v2,capacity,cost):
         edgelist=self.edges[v1]
         newedge=Edge(self.edgeid,v1,v2,capacity,cost)
@@ -69,6 +70,7 @@ class fastApproxMCMC:
                 print "edge already exists! please check"
         edgelist.append(newedge)
         self.edges[v2]=edgelist
+
     #input:[[v_i1,v_i2,b_i]]
     def fastApproximization(self, listofpairs,epsilon,budget):
       #Step1, compute a solution x, which maybe infeasible
@@ -80,18 +82,21 @@ class fastApproxMCMC:
         #find a min-cost point x' \in P for cost c=y^t A
         #update x <-- (1-\sigma)x +\sigma x'
       usedbw=self.usedBW(x)
-      m=len(self.alledges)
+      m=len(self.alledges)+1
       lambda_0=self.maxRatio(usedbw,budget)
       alpha=4/lambda_0/epsilon*math.log(2*m/epsilon)
       totalflow=sum([r[2] for r in listofpairs])
       mincapacity=min(e.capacity for e in self.alledges)
       rou=float(totalflow)/float(mincapacity)
       sigma=epsilon/(4*alpha*rou)
+      print "lambda_0: %s alpha: %s sigma:%s"%(lambda_0,alpha,sigma)
+      if(lambda_0<=1):
+        self.printSolution(x)
       maxratio=lambda_0
       y=[]
       totalcost=sum([usedbw[k]*k.cost for k in usedbw])
       cost_y=1/float(budget)*math.exp(alpha*totalcost/budget)
-      for i in range(m):
+      for i in range(len(self.alledges)):
         if self.alledges[i] in usedbw:
           y.append(1/float(self.alledges[i].capacity)*math.exp(alpha*(float(usedbw[self.alledges[i]])/float(self.alledges[i].capacity))))
           self.alledges[i].beta=y[i]+cost_y*self.alledges[i].cost-self.alledges[i].cost
@@ -100,8 +105,13 @@ class fastApproxMCMC:
           y.append(1/float(self.alledges[i].capacity))
           self.alledges[i].beta=y[i]+cost_y*self.alledges[i].cost-self.alledges[i].cost
       y.append(cost_y)
-      minx=self.minX(listofpairs,self.alledges)
+      print "y: %s"%(y)
+      print "before iteration -1"
+      maxy=max([e.cost+e.beta for e in self.alledges])
+      factor=maxy/1000.0
+      minx=self.minX(listofpairs,self.alledges,factor)
       iterate=0
+      print "before iteration 0"
       while maxratio>=lambda_0/2 and not self.determineP2(usedbw,self.alledges,y,minx,epsilon,maxratio,budget):
         print "interation: %s"%(iterate)
         iterate+=1
@@ -120,8 +130,9 @@ class fastApproxMCMC:
             y.append(1/float(e.capacity))
             self.alledges[i].beta=y[i]+cost_y*self.alledges[i].cost-self.alledges[i].cost
         y.append(cost_y)
-
-        minx=self.minX(listofpairs,self.alledges)
+        maxy=max([e.cost+e.beta for e in self.alledges])
+        factor=maxy/1000.0
+        minx=self.minX(listofpairs,self.alledges,factor)
         #update x
         new_x=[]
         for j in range(len(x)):
@@ -146,14 +157,12 @@ class fastApproxMCMC:
       if maxratio>1+epsilon:
         print "No feasible solution with approximation"
       else:
-        for flow in x:
-          self.printFlow(flow)
-        return x
+        self.printSolution(x)
 
-    def minX(self,listofpairs, alledges):
+    def minX(self,listofpairs, alledges,factor=1):
       x=[]
       for pair in listofpairs:
-          flow=MinCostFlow.minCostFlow(pair[0],pair[1],pair[2],alledges,False)
+          flow=MinCostFlow.minCostFlow(pair[0],pair[1],pair[2],alledges,False,factor)
           if(len(flow)==0):
             print "Infeasible, exit."
             return
@@ -192,6 +201,16 @@ class fastApproxMCMC:
           else:
             usedbw[link[0]]=link[1]
       return usedbw
+
+    def printSolution(self,x):
+      print "find feasible solution"
+      usedbw=self.usedBW(x)
+      totalcost=sum([e.cost*usedbw[e] for e in usedbw])
+      print "total cost:%s" %(totalcost)
+      for flow in x:
+        print "pair"
+        self.printFlow(flow)
+      return x
 
     def printFlow(self,flow):
         for link in flow:
