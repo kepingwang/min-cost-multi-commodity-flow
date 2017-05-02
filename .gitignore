@@ -2,3 +2,4 @@
 __pycache__/
 *.net.lp*
 *.net.d.lp*
+*.log
