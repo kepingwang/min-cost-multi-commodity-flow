@@ -64,6 +64,8 @@ class Graph():
     self._nodes = [v for v in range(num_nodes)]
     self._edges = []
     self._reqs = []
+    self._edges_in = [[] for v in range(num_nodes)]
+    self._edges_out = [[] for v in range(num_nodes)]
   @property
   def num_nodes(self):
     return self._num_nodes
@@ -76,10 +78,16 @@ class Graph():
   @property
   def reqs(self):
     return self._reqs
+  def add_edge(self, edge):
+    self._edges.append(edge)
+    self._edges_in[edge.v2].append(edge)
+    self._edges_out[edge.v1].append(edge)
+  def add_req(self, req):
+    self._reqs.append(req)
   def edges_out(self, node): # the slowest implementation
-    return [e for e in self.edges if e.v1 == node]
+    return self._edges_out[node]
   def edges_in(self, node):
-    return [e for e in self.edges if e.v2 == node]
+    return self._edges_in[node]
   def __str__(self):
     num_node_str = "{}\n".format(self.num_nodes)
     edges_str = ''.join([edge.__str__()+'\n' for edge in self.edges])
@@ -105,12 +113,12 @@ def read_graph(filename):
       elif reading_area == 'edges':
         if not line[0].isalpha():
           edge = Edge(*tuple(nums(line)))
-          graph.edges.append(edge)
+          graph.add_edge(edge)
         else:
           reading_area = 'requirements'
       elif reading_area == 'requirements':
         req = Req(*tuple(nums(line)))
-        graph.reqs.append(req)
+        graph.add_req(req)
   return graph
 
 
@@ -119,10 +127,10 @@ def convertToDiGraph(graph):
   for e in graph.edges:
     edge1 = Edge(e.v1, e.v2, e.cap, e.cost)
     edge2 = Edge(e.v2, e.v1, e.cap, e.cost)
-    digraph.edges.append(edge1)
-    digraph.edges.append(edge2)
+    digraph.add_edge(edge1)
+    digraph.add_edge(edge2)
   for req in graph.reqs:
-    digraph.reqs.append(req)
+    digraph.add_req(req)
   return digraph
     
     

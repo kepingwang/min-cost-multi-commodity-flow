@@ -526,3 +526,64 @@ CPLEX Error  1436: Max or Min missing.
 No file read.
 No problem exists.
 No problem exists.
+
+Log started (V12.7.1.0) Mon May  1 23:12:40 2017
+
+CPLEX Error  1436: Max or Min missing.
+No file read.
+No problem exists.
+No problem exists.
+
+Log started (V12.7.1.0) Mon May  1 23:12:42 2017
+
+CPLEX Error  1436: Max or Min missing.
+No file read.
+No problem exists.
+No problem exists.
+
+Log started (V12.7.1.0) Mon May  1 23:38:21 2017
+
+
+Problem 'graph/net1.net.lp' read.
+Read time = 0.01 sec. (0.00 ticks)
+CPXPARAM_Read_APIEncoding                        "UTF-8"
+Tried aggregator 1 time.
+LP Presolve eliminated 10 rows and 8 columns.
+All rows and columns eliminated.
+Presolve time = 0.00 sec. (0.00 ticks)
+
+Dual simplex - Optimal:  Objective =  5.2000000000e+01
+Solution time =    0.00 sec.  Iterations = 0 (0)
+Deterministic time = 0.01 ticks  (7.11 ticks/sec)
+
+
+Variable Name           Solution Value
+x1                            2.000000
+x3                            4.000000
+All other variables in the range 1-8 are 0.
+
+Log started (V12.7.1.0) Mon May  1 23:38:21 2017
+
+
+Problem 'graph/net1.net.d.lp' read.
+Read time = 0.00 sec. (0.00 ticks)
+CPXPARAM_Read_APIEncoding                        "UTF-8"
+Tried aggregator 1 time.
+LP Presolve eliminated 10 rows and 2 columns.
+Reduced LP has 12 rows, 14 columns, and 32 nonzeros.
+Presolve time = 0.00 sec. (0.01 ticks)
+
+Iteration log . . .
+Iteration:     1   Dual objective     =            16.000000
+
+Dual simplex - Optimal:  Objective =  4.0000000000e+01
+Solution time =    0.00 sec.  Iterations = 5 (0)
+Deterministic time = 0.02 ticks  (24.25 ticks/sec)
+
+
+Variable Name           Solution Value
+x2                            2.000000
+x3                            3.000000
+x4                            1.000000
+x9                            3.000000
+All other variables in the range 1-16 are 0.

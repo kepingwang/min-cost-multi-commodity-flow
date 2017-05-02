@@ -9,6 +9,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("inputfile", help="input .net file")
 parser.add_argument("-d", "--digraph", help="convert the input graph to digraph",
                     action="store_true")
+parser.add_argument("--debug", help="debug mode print out current constraint count",
+                    action="store_true")
 
 # variables f_{(req, edge)}
 # objective is to minimize the total cost
@@ -17,6 +19,8 @@ parser.add_argument("-d", "--digraph", help="convert the input graph to digraph"
 # bandwidth constraints
 # flow conservation constraints
 # capacity constraints
+
+
 
 class VarReg():
   """
@@ -51,8 +55,10 @@ class VarReg():
     return res
 
 class MultiCommMinCostFlowLP():
-  def __init__(self, graph):
+  def __init__(self, graph, debug=False):
     self.var = VarReg()
+    self.debug = debug
+    self.constraint_count = 1
     self._constraints = "Subject To\n"
     self._constraints += "\ Bandwidth Constraints\n"
     self._constraints += self._bandwidth_constraints(graph)
@@ -69,7 +75,12 @@ class MultiCommMinCostFlowLP():
     self._bounds += "\n"
     self._lp_expression = self._objective \
                           + self._constraints + self._bounds + "End\n\n"
-      
+
+  def _count_constraint(self):
+    if self.debug:
+      print("constraint count: {}".format(self.constraint_count))
+    self.constraint_count += 1
+    
   def flows_r(self, req, edges, sep=" + "):
     return reduce(
       lambda x, y: x + sep + y,
@@ -80,8 +91,12 @@ class MultiCommMinCostFlowLP():
       lambda x, y: x + sep + y,
       [self.var.get(req, edge) for req in reqs]
     )
+
+  
   
   def _bandwidth_constraints(self, graph):
+    """ # req * # nodes
+    """
     res = ""
     for req in graph.reqs:
       if graph.edges_out(req.src):
@@ -89,9 +104,12 @@ class MultiCommMinCostFlowLP():
           flow_req_src = self.flows_r(req, graph.edges_out(req.src)),
           req_val = req.val
         )
+        self._count_constraint()
     return res
 
   def _flow_conservation_constraints(self, graph):
+    """ # edge * # req
+    """
     res = ""
     for node in graph.nodes:
       for req in graph.reqs:
@@ -102,9 +120,12 @@ class MultiCommMinCostFlowLP():
             res += " - " + self.flows_r(req, graph.edges_out(node), sep=" - ")
           if res != "":
             res += " = 0\n"
+            self._count_constraint()
     return res
 
   def _capacity_constraints(self, graph):
+    """ # edge * # req
+    """
     res = ""
     for edge in graph.edges:
       if graph.reqs:
@@ -112,6 +133,7 @@ class MultiCommMinCostFlowLP():
           flow_edge = self.flows_e(edge, graph.reqs),
           edge_cap = edge.cap
         )
+        self._count_constraint()
     return res
 
   @property
@@ -126,6 +148,7 @@ if __name__ == '__main__':
   graph = graph_utils.read_graph(args.inputfile)
   if args.digraph:
     graph = graph_utils.convertToDiGraph(graph)
-  lp = MultiCommMinCostFlowLP(graph)
-  print(lp.var_dict)
+  lp = MultiCommMinCostFlowLP(graph, args.debug)
+  if args.debug:
+    print(lp.var_dict)
   print(lp.lp_expression)
