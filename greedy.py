@@ -78,6 +78,7 @@ class greedyMCMC:
       print "len(setofpairs): %s" %(len(sop))
       
       solutions={}
+      #The current solutions for pairs of requirements that use the edge
       e_pair={}
       ITER=10000
       cur=0
@@ -90,28 +91,47 @@ class greedyMCMC:
           if (pair[0],pair[1]) in solutions:
             continue
           #print "hah"
+          #the flow with residual graph
           flow=MinCostFlow.minCostFlow(pair[0],pair[1],pair[2],self.alledges,False)
+          cost=sum([link[0].getAVLDualL()*link[1] for link in flow])
+          # the flow with original graph
+
+          # the flow with original graph
           #print "Flow1"
           #self.printFlow(flow)
           if len(flow)>0:
-            for link in flow:
+            newflow=MinCostFlow.minCostFlow(pair[0],pair[1],pair[2],self.alledges,True)
+            newcost=sum([link[0].getAVLDualL()*link[1] for link in newflow])
+            if(float(cost)/float(newcost)>1.5):
+              for link in newflow:
+                if link[0].getAVLBW()<link[1]:
+                  link[0].extendBeta(3)
+                  for p in e_pair[link[0]]:
+                    sol=solutions.pop(p)
+                    for ec in sol:
+                      ec[0].avlBW+=ec[1]
+                      if ec[0]!=link[0]:
+                        e_pair[ec[0]].remove(p)
+                  e_pair[link[0]]=Set()
+            else:
               solutions[(pair[0],pair[1])]=flow
-              link[0].useBW(link[1])
-              #self.printGraph()
-              if link[0] in e_pair:
-                s=e_pair[link[0]]
-                s.add((pair[0],pair[1]))
-              else:
-                s=Set()
-                s.add((pair[0],pair[1]))
-                e_pair[link[0]]=s
+              for link in flow:
+                link[0].useBW(link[1])
+                #self.printGraph()
+                if link[0] in e_pair:
+                  s=e_pair[link[0]]
+                  s.add((pair[0],pair[1]))
+                else:
+                  s=Set()
+                  s.add((pair[0],pair[1]))
+                  e_pair[link[0]]=s
           else:
             newflow=MinCostFlow.minCostFlow(pair[0],pair[1],pair[2],self.alledges,True)
             #print "Flow2"
             #self.printFlow(newflow)
             for link in newflow:
               if link[0].getAVLBW()<link[1]:
-                link[0].extendBeta(1)
+                link[0].extendBeta(3)
                 for p in e_pair[link[0]]:
                   sol=solutions.pop(p)
                   for ec in sol:

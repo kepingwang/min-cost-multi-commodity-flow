@@ -72,7 +72,7 @@ class fastApproxMCMC:
         self.edges[v2]=edgelist
 
     #input:[[v_i1,v_i2,b_i]]
-    def fastApproximization(self, listofpairs,epsilon,budget):
+    def fastApproximization(self, listofpairs,epsilon,budget,initx):
       #Step1, compute a solution x, which maybe infeasible
       x=self.minX(listofpairs,self.alledges)
       #Step2, compute \lambda_0
@@ -87,9 +87,16 @@ class fastApproxMCMC:
       alpha=4/lambda_0/epsilon*math.log(2*m/epsilon)
       totalflow=sum([r[2] for r in listofpairs])
       mincapacity=min(e.capacity for e in self.alledges)
-      rou=float(totalflow)/float(mincapacity)
+      #rou estimation: For the minimum-capacity edge, if the capacity is smaller thank the requested, contribute 1, otherwise contribute request/min-ca
+      #rou=float(totalflow)/float(mincapacity)
+      rou=0
+      for r in listofpairs:
+        if(r[2]>mincapacity):
+          rou +=1
+        else:
+          rou += r[2]/float(mincapacity)
       sigma=epsilon/(4*alpha*rou)
-      print "lambda_0: %s alpha: %s sigma:%s"%(lambda_0,alpha,sigma)
+      print "lambda_0: %s alpha: %s rou: %s sigma:%s"%(lambda_0,alpha,rou,sigma)
       if(lambda_0<=1):
         self.printSolution(x)
       maxratio=lambda_0
@@ -108,11 +115,14 @@ class fastApproxMCMC:
       print "y: %s"%(y)
       print "before iteration -1"
       maxy=max([e.cost+e.beta for e in self.alledges])
-      factor=maxy/1000.0
+      #factor=maxy/1000.0
+      factor=1
       minx=self.minX(listofpairs,self.alledges,factor)
       iterate=0
       print "before iteration 0"
-      while maxratio>=lambda_0/2 and not self.determineP2(usedbw,self.alledges,y,minx,epsilon,maxratio,budget):
+      flag=0
+      while maxratio>=lambda_0/2 and (flag==0 or not self.determineP2(usedbw,self.alledges,y,minx,epsilon,maxratio,budget)):
+        flag=1
         print "interation: %s"%(iterate)
         iterate+=1
         sys.stdout.flush()
@@ -131,7 +141,8 @@ class fastApproxMCMC:
             self.alledges[i].beta=y[i]+cost_y*self.alledges[i].cost-self.alledges[i].cost
         y.append(cost_y)
         maxy=max([e.cost+e.beta for e in self.alledges])
-        factor=maxy/1000.0
+        #factor=maxy/1000.0
+        factor=1
         minx=self.minX(listofpairs,self.alledges,factor)
         #update x
         new_x=[]
@@ -158,6 +169,7 @@ class fastApproxMCMC:
         print "No feasible solution with approximation"
       else:
         self.printSolution(x)
+        return x
 
     def minX(self,listofpairs, alledges,factor=1):
       x=[]
@@ -181,7 +193,7 @@ class fastApproxMCMC:
         lambda_0=float(totalcost)/float(budget)
       print "ratio:"+str(float(totalcost)/float(budget))
       return lambda_0
-
+    #Condition P2 is not correctly implemented
     def determineP2(self,usedbw,alledges,y,minx,epsilon,lambda_,budget):
       ytax=sum([(e.cost+e.beta)*usedbw.get(e,0) for  e in alledges])
       usedbw_new=self.usedBW(minx)

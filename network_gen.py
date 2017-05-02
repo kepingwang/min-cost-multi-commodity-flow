@@ -8,7 +8,7 @@ edges={}
 pairs={}
 rrange=[10,30]
 crange=[2,10]
-nhop=10
+nhop=5
 
 def printGraph(nvertex,pairs,edges,name):
   f=open("graph/"+name+".net","w")
