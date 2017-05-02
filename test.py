@@ -14,7 +14,7 @@ fastmcmc=fastApproxMCMC()
 fastmcmc.readGraph(sys.argv[1])
 fastmcmc.printGraph()
 start = time.time()
-fastmcmc.fastApproximization(fastmcmc.requirements,0.5,1000)
+fastmcmc.fastApproximation(fastmcmc.requirements,0.5,1000)
 print "it took", time.time() - start, "seconds."
 
 

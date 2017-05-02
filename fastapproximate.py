@@ -72,9 +72,24 @@ class fastApproxMCMC:
         self.edges[v2]=edgelist
 
     #input:[[v_i1,v_i2,b_i]]
-    def fastApproximization(self, listofpairs,epsilon,budget,initx):
-      #Step1, compute a solution x, which maybe infeasible
+    def fastApproximation(self,listofpairs,epsilon,budget):
+      e=2.0
       x=self.minX(listofpairs,self.alledges)
+      while e>epsilon:
+        x=self.fractionalPacking(listofpairs,e,budget,x)
+        if x is None:
+          print "no feasible solutions"
+          break
+        e=e/2.0
+        if(e<epsilon):
+          e=epsilon
+      self.printSolution(x)
+      return x
+
+    def fractionalPacking(self, listofpairs,epsilon,budget,initx):
+      #Step1, compute a solution x, which maybe infeasible
+      #x=self.minX(listofpairs,self.alledges)
+      x=initx
       #Step2, compute \lambda_0
       #for each edge, compute used bandwidth /capacity, find the minimum and maximum ratio
       #While max_i a_ix/b_i >= \lambda0/2 and x and y do not satisfy P2
@@ -167,8 +182,9 @@ class fastApproxMCMC:
         maxratio=self.maxRatio(usedbw,budget)
       if maxratio>1+epsilon:
         print "No feasible solution with approximation"
+        return None
       else:
-        self.printSolution(x)
+     #   self.printSolution(x)
         return x
 
     def minX(self,listofpairs, alledges,factor=1):
