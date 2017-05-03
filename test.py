@@ -16,8 +16,25 @@ fastmcmc.printGraph()
 start = time.time()
 sys.stdout.flush()
 print "Trying to solve %s with %s-approximation and cost %s"%(sys.argv[1],sys.argv[2],sys.argv[3])
-fastmcmc.fastApproximation(fastmcmc.requirements,float(sys.argv[2]),int(sys.argv[3]))
-print "it took", time.time() - start, "seconds."
+budget=int(sys.argv[3])
+high=budget
+low=0
+b=high
+epsilon=float(sys.argv[2])
+x=fastmcmc.fastApproximation(fastmcmc.requirements,epsilon,b)
+bestx=x
+while(high-low>low*float(sys.argv[2])):
+  print "high: %s low: %s"%(high,low)
+  if x is None:
+    low=b
+  else:
+    high=b
+  b=(low+(high-low)/2)
+  x=fastmcmc.fastApproximation(fastmcmc.requirements,epsilon,b)
+  if x is not None and x[1]<bestx[1]:
+    bestx=x
+
+print "it took", time.time() - start, "seconds. cost:"+str(bestx[1])
 
 
 #network=greedyMCMC()

@@ -6,9 +6,9 @@ nvertex=int(sys.argv[1])
 npairs=int(sys.argv[2])
 edges={}
 pairs={}
-rrange=[10,30]
-crange=[2,10]
-nhop=5
+rrange=[1,30]
+crange=[2,100]
+hoprange=[2,min(10,nvertex)]
 
 def printGraph(nvertex,pairs,edges,name):
   f=open("graph/"+name+".net","w")
@@ -29,6 +29,7 @@ for i in range(npairs):
     r=random.randint(rrange[0],rrange[1])
     pairs[(v1,v2)]=r
     lastv=v1
+    nhop=random.randint(hoprange[0],hoprange[1])
     for j in range(nhop):
       medh=random.randint(0,nvertex-1)
       while medh==lastv or medh==v2:
@@ -48,6 +49,22 @@ for i in range(npairs):
       edges[(vv1,vv2)]=val+r
     else:
       edges[(vv1,vv2)]=r
+#add random edges
+edgenum=len(edges)
+addnum=edgenum/3
+for i in range(addnum):
+  v1=random.randint(0,nvertex-1)
+  v2=random.randint(0,nvertex-1)
+  if v1==v2:
+    continue
+  vv1=min(v1,v2)
+  vv2=max(v1,v2)
+  r=random.randint(rrange[0],rrange[1])
+  if (vv1,vv2) in edges:
+    val=edges[(vv1,vv2)]
+    edges[(vv1,vv2)]=val+r
+  else:
+    edges[(vv1,vv2)]=r
 
 printGraph(nvertex,pairs,edges,sys.argv[3])
 

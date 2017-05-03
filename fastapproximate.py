@@ -82,12 +82,12 @@ class fastApproxMCMC:
         return
       while e>1/4.0:
         e=e/2.0
-        x=self.fractionalPacking(listofpairs,e,budget,x)
+        x=self.fractionalPacking(listofpairs,e,budget,x[0])
         if x is None:
           print "No feasible %s-approximation solution"%(e*6)
           return None
       e=1/6.0
-      x=self.fractionalPacking(listofpairs,e,budget,x)
+      x=self.fractionalPacking(listofpairs,e,budget,x[0])
       if x is not None:
         print "find 1-appromation solution"
       else:
@@ -99,12 +99,12 @@ class fastApproxMCMC:
         e=e/2.0
         if 6*e>epsilon:
           e=epsilon/6
-          x=self.fractionalPacking(listofpairs,e,budget,x)
+          x=self.fractionalPacking(listofpairs,e,budget,x[0])
           if x is None:
             print "No feasible %s-approximation solution"%(epsilon)
             break
       if x is not None:
-        self.printSolution(x)
+        self.printSolution(x[0])
       return x
 
     #Improve-packing(x,epsilon)
@@ -122,6 +122,8 @@ class fastApproxMCMC:
       lambda_0=self.maxRatio(usedbw,budget)
  #     print "lambda_0:%s epsilon:%s m:%s "%(lambda_0,epsilon,m)
       alpha=4/lambda_0/epsilon*math.log(2*m/epsilon)
+      while alpha>10:
+        alpha=alpha-5
 
 #      print "lambda_0:%s epsilon:%s m:%s alpha:%s part1:%s  part2:%s"%(lambda_0,epsilon,m,alpha)
       totalflow=sum([r[2] for r in listofpairs])
@@ -157,7 +159,7 @@ class fastApproxMCMC:
       #print "y: %s"%(y)
       maxy=max([e.cost+e.beta for e in self.alledges])
       factor=maxy/1000.0
-      #factor=1
+      factor=1
       minx=self.minX(listofpairs,self.alledges,factor)
       while maxratio>=lambda_0/2 and not self.determineP2(usedbw,self.alledges,y,minx,epsilon,maxratio,budget):
         y=[]
@@ -175,10 +177,10 @@ class fastApproxMCMC:
             self.alledges[i].beta=y[i]+cost_y*self.alledges[i].cost-self.alledges[i].cost
         y.append(cost_y)
         maxy=max([e.cost+e.beta for e in self.alledges])
-        print "maxy:%s"%(maxy)
-        sys.stdout.flush()
+      #  print "maxy:%s"%(maxy)
+      #  sys.stdout.flush()
         factor=maxy/1000.0
-        #factor=1
+        factor=1
         minx=self.minX(listofpairs,self.alledges,factor)
         #update x
         new_x=[]
@@ -207,7 +209,7 @@ class fastApproxMCMC:
      #   self.printSolution(x)
         print "max ratio:"+str(maxratio)
         sys.stdout.flush()
-        return x
+        return [x,sum([usedbw[k]*k.cost for k in usedbw]) ]
 
     def minX(self,listofpairs, alledges,factor=1):
       x=[]
