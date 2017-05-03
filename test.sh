@@ -1,2 +1,2 @@
 #!/bin/bash
-python ./test.py graph/$1.net |tee out.txt|tee out/$1.out
+python ./test.py graph/$1.net $2 $3 |tee out.txt|tee out/$1.out
