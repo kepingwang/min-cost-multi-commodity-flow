@@ -1,0 +1,74 @@
+\documentclass[a4paper]{article}
+
+%% Language and font encodings
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+
+%% Sets page size and margins
+\usepackage[a4paper,top=3cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+%% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+
+\title{Meet the communications needs of customers at least cost}
+\author{Yuanjun Yao, Keping Wang}
+
+\begin{document}
+\maketitle
+
+%\begin{abstract}
+%Your abstract.
+%\end{abstract}
+
+\section{Introduction}
+
+
+\section{Problem Definition}
+
+Suppose we have a capacitated  undirected computer network $(V, E, C, A)$,
+where $c_e$ is the capacity of edge $e$, and $a_e$ is the unit cost of edge $e$. There are pairs $(s_i,t_i)$ that requires a undirected path of bandwidth $b_i$ between $s_i$ to $t_i$. The problem is, can we meet the bandwidth requirements of pairs at minimum cost?
+
+(1) Capacity Constraint: $\forall (u,v)\in E, \sum_{f_{u,v,j}}\leq C_e$
+
+(2) Flow conservation: $\forall(s_i, t_i), \forall v\in {V\setminus\{s_i,t_i\}}, \sum_{v,u\in E}f(v,u,j_i))-\sum_{u,v\in E}f(u,v,j_i)=0$
+
+ $\forall s_i,\sum_{(s_i,v)\in E}f(s_i,v,i)\geq b_i$
+
+The primal problem is:
+
+$Minimize \sum _{u,v,i}a(u,v)(f(u,v,i)+f(v,u,i))$, s.t.
+
+$(1) \forall e(u,v)\in E, \sum_{i}f(u,v,i)\leq C_e$
+
+(2) $\forall e(u,v), \sum_{i}f(v,u,i)\leq C_e$
+
+$(2) \forall i, \forall v\in V\setminus\{s_i,t_i\}, \sum_{(v,u)\in E}f(v,u,j_i)-\sum_{(u,v)\in E}f(u,v,j_i)=0$
+
+
+$(3) \forall (s_i,t_i), \forall v\in V, \sum_{(s_i,v)\in E}f(s_i,v,j_i) \geq b_i$
+
+For constraints (1), add dual variables $\alpha_(u,v)$. 
+
+For constraints (2), add dual variables $\alpha_(v,u)$. 
+
+For constraints (2), add dual variables $\beta_{i,v}$, 
+
+For constraints (3), add dual variables $\gamma_{i}$, 
+
+The dual problem is, 
+
+$Maximize -\sum_{e\in E}C_e(\alpha_{u,v}+\alpha_{v,u})+\sum_{i}b_i\gamma_i$
+
+s.t.
+
+$ \alpha_{u,v} \leq a(u,v)$
+
+
+
+
+
+\end{document}

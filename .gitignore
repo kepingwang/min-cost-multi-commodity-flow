@@ -3,3 +3,8 @@ __pycache__/
 *.net.lp*
 *.net.d.lp*
 *.log
+
+*.bbl
+*.blg
+*.out
+*.aux
